@@ -48,8 +48,6 @@ static void EdgeThinner(const Mat &input)
 
 
 }
-
-
 static void CannyThreshold(int, void*)
 {
 	blur(src_gray, detected_edges, Size(3, 3));
@@ -57,56 +55,14 @@ static void CannyThreshold(int, void*)
 	Scharr(detected_edges, dy_Scharr, CV_32F, 0, 1, 1, 0, BORDER_REPLICATE);
 	//sqrt(dx.mul(dx) + dy.mul(dy), sobel);
 	sqrt(dx_Scharr.mul(dx_Scharr) + dy_Scharr.mul(dy_Scharr), scharr);
-	
-	/*
-	angle.create(dx.size(), CV_8UC3);
-	double temp;
-	for (int y = 0; y <angle.rows; y++)
-		for (int x = 0; x < angle.cols; x++)
-		{
-			temp = atan2((double)(dy.at<float>(y, x)), (double)(dx.at<float>(y, x)));
-			if ((temp >= -CV_PI / 4 && temp <= CV_PI / 4) || (temp >= CV_PI * 3 / 4 && temp <= -CV_PI * 3 / 4))
-				angle.at<Vec3b>(y, x)[0] = temp * 180 / CV_PI;
-			else
-				angle.at<Vec3b>(y, x)[2] = temp * 180 / CV_PI;
-		}
-	
-
-	double minValx, maxValx;
-	minMaxLoc(dx, &minValx, &maxValx);
-	dx.convertTo(dx, CV_8U, 255.0 / (maxValx - minValx), -minValx*255.0 / (maxValx - minValx));
-	cout << "Maxval : " << maxValx << "Minval : " << minValx << endl;
-
-	double minValy, maxValy;
-	minMaxLoc(dy, &minValy, &maxValy);
-	dy.convertTo(dy, CV_8U, 255.0 / (maxValy - minValy), -minValy*255.0 / (maxValy - minValy));
-	cout << "Maxval : " << maxValy << "Minval : " << minValy << endl;
-	*/
-	
+		
 	double minVal_s, maxVal_s;
 	minMaxLoc(scharr, &minVal_s, &maxVal_s);
 		
 	scharr.convertTo(draw1, CV_8U, 255.0 / (maxVal_s - minVal_s), 0);
 	EdgeThinner(draw1);
 	
-	/*
-	Thinedge.copyTo(dx2_edge);
 
-	Scharr(dx2_edge, dx2, CV_32F, 1, 0, 1, 0, BORDER_REPLICATE);
-	cout << "height : " << dx2.rows << "width : " << dx2.cols << endl;
-	for (int y = 0; y < dx2.rows; y++)
-	{
-		float *onerow = dx2.ptr<float>(y);
-		uchar *edge_row = dx2_edge.ptr<uchar>(y);
-		for (int x = 0; x < dx2.cols; x++)
-		{
-			if (abs(onerow[x]) > 50)
-				edge_row[x] = 0;
-				
-		}
-	}
-	*/
-	
 	
 
 	Canny(detected_edges, mask, lowThreshold, lowThreshold*ratio, kernel_size);
@@ -132,79 +88,6 @@ static void CannyThreshold(int, void*)
 	
 	
 }
-
-/* HoughLinesGrad 함수 짜다가 중지
-static void HoughLinesGrad(const Mat &edge, const Mat &dx, const Mat &dy,
-	float rho, float theta, int threshold, vector<Vec2f> &lines)
-{
-	float max_theta = CV_PI/2, min_theta = -CV_PI/2;
-	int accm_width = (max_theta - min_theta) / theta +1;
-	float rmax = sqrt((pow((double)(edge.rows),2.0) + pow((double)(edge.cols),2.0)));
-	int accm_height = cvRound(rmax / rho)+1;
-	float dtheta = 10*(CV_PI/180); //(rad) 
-
-	CV_Assert(edge.type() == CV_8UC1);
-	Mat accm ;
-	Mat image;
-	edge.copyTo(image);
-	accm.create(accm_height, accm_width, CV_16UC1);
-	
-	int img_height = edge.rows;
-	int img_width = edge.cols;
-
-	accm = Scalar::all(0);
-
-	float r;
-	int rnum;
-	int angnum;
-	for (int y = 0; y < img_height; y++)
-	{
-		uchar* img_row = image.ptr<uchar>(y);
-		for (int x = 0; x < img_width; x++)
-		{
-			float cen_ang = (float)atan((double)(dy.at<float>(y, x))/ (double)(dx.at<float>(y, x)));
-			if (img_row[x] != 0)
-			{
-				for (float ang = (cen_ang - dtheta); ang < cen_ang + dtheta; ang += theta)
-				{
-					r = (float)(x * cos(ang) + y * sin(ang));
-					if ((r / rho - (int)(r / rho)) != 0)
-						rnum = cvRound(r / rho);
-					else
-						rnum = r / rho;
-					
-					if ((ang / theta - (int)(ang / theta)) != 0)
-						angnum = cvRound(ang / theta);
-					else
-						angnum = ang / theta;
-					
-					if (angnum >= 0)
-						angnum = angnum + (accm_width - 1) / 2;
-					else
-						angnum = (accm_width - 1) / 2 + angnum;
-					
-					//cout << "x :" << x << "y : " << y << endl;
-					if (rnum < 0)
-					{
-						cout << "rnum: " << rnum << "angnum : " << angnum << endl;
-						cout << "x :" << x << "y: " << y << endl;
-						cout << "cen_angle : " << cen_ang <<" angle :"<<ang<< endl;
-						cout << endl;
-					}
-					//accm.at<ushort>(rnum, angnum) += 1;
-					
-				}
-				
-			}
-		}
-
-	}
-
-	imshow("Accumulator",accm);
-
-}
-*/
-
 
 
 int main(int argc, char** argv)
@@ -297,39 +180,6 @@ int main(int argc, char** argv)
 	}
 	imwrite("Houghline_byCanny.jpg", Hough_thin);
 
-	/*
-	// Probabilistic Line Transform
-	vector<Vec4i> linesP; // will hold the results of the detection
-	HoughLinesP(dst, linesP, 1, CV_PI / 180, 50, 100, 10); // runs the actual detection
-														  // Draw the lines
-	int cntP = 0;
-	for (size_t i = 0; i < linesP.size(); i++)
-	{
-		Vec4i l = linesP[i];
-		line(cdstP, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(0, 0, 255), 3, LINE_AA);
-		double thetaP = atan2(l[3] - l[1], l[2] - l[0]);
-		double thetaP_d = thetaP * 180 / CV_PI;
-		if (thetaP_d == 0 || thetaP_d == -90)
-			cntP++;
-		
-		cout << "각도 : " << thetaP_d << endl;
-	}
-	cout << "평행or 수직 : " << cntP << endl;
-	cout << "전체 갯수 : " << linesP.size() << endl;
-
-
-	//cout << "90도 : " << cnt_in << endl;
-	//cout << "90도이외 : " << cnt_out << endl;
-
-	
-	namedWindow("Detected Lines (in red) - Probabilistic Line Transform", WINDOW_KEEPRATIO);
-	
-	imshow("Detected Lines (in red) - Probabilistic Line Transform", cdstP);
-	*/
-
-
-	//namedWindow("Detected Lines (in red) - Standard Hough Line Transform", WINDOW_KEEPRATIO);
-	//imshow("Detected Lines (in red) - Standard Hough Line Transform", cdst);
 
 	namedWindow("Source", WINDOW_KEEPRATIO);
 	namedWindow("Hough_edge", WINDOW_KEEPRATIO);
