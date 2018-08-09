@@ -9,12 +9,11 @@ using namespace std;
 using namespace cv;
 
 Mat src, src_gray;
-Mat dst, detected_edges,mask,Hough_thin,Hough;
-Mat dx_Scharr,dy_Scharr, scharr,dx2;
+Mat dst, detected_edges,mask,Hough_thin;
+Mat dx_Scharr,dy_Scharr, scharr;
 Mat draw1;
-Mat dx2_edge;
 int lowThreshold = 10;
-const int max_lowThreshold = 100;
+//const int max_lowThreshold = 100;
 const int ratio = 3;
 const int kernel_size = 3;
 const char* window_name = "Edge Map";
@@ -63,36 +62,6 @@ static void CannyThreshold(int, void*)
 		
 	scharr.convertTo(draw1, CV_8U, 255.0 / (maxVal_s - minVal_s), 0); // draw1 에 Scharr 결과 대입하면서 CV_8U로 형변환
 	EdgeThinner(draw1);
-	
-	Mat hor, ver;
-	hor.create(dx_Scharr.size(), CV_8UC1);
-	ver.create(dx_Scharr.size(), CV_8UC1);
-	
-	//namedWindow("dx", WINDOW_KEEPRATIO);
-	//imshow("dx", dx_Scharr);
-	//imwrite("dx_Scharr_FocusRange.jpg", dx_Scharr);
-	//namedWindow("dy", WINDOW_KEEPRATIO);
-	//imshow("dy", dy_Scharr);
-
-	dx_Scharr = abs(dx_Scharr);
-	dy_Scharr = abs(dy_Scharr);
-	double maxVal_x, minVal_x;
-	minMaxLoc(dx_Scharr, &minVal_x, &maxVal_x);
-	cout << minVal_x << " " << maxVal_x << endl;
-	double maxVal_y, minVal_y;
-	minMaxLoc(dy_Scharr, &minVal_y, &maxVal_y);
-	cout << minVal_y << " " << maxVal_y << endl;
-
-	hor = Scalar::all(0);
-	ver = Scalar::all(0);
-	
-	dx_Scharr.convertTo(ver, CV_8U, 255.0 / (maxVal_x - minVal_x), 0.0 );
-	dy_Scharr.convertTo(hor, CV_8U, 255.0 / (maxVal_y - minVal_y), 0.0 ); 
-
-	EdgeThinner(hor);
-	EdgeThinner(ver);
-	
-
 	Canny(detected_edges, mask, lowThreshold, lowThreshold*ratio, kernel_size);
 	dst = Scalar::all(0);
 	src.copyTo(dst, mask);
@@ -105,29 +74,28 @@ static void CannyThreshold(int, void*)
 	//namedWindow("Scharr grad", WINDOW_KEEPRATIO);
 	//imshow("Scharr grad", draw1);
 	
+	
+	//namedWindow("dx", WINDOW_KEEPRATIO);
+	//imshow("dx", dx_Scharr);
+
+	//namedWindow("dy", WINDOW_KEEPRATIO);
+	//imshow("dy", dy_Scharr);
+
 	//Edge Thinner Showing
-	namedWindow("Thin Edge", WINDOW_KEEPRATIO);
-	imshow("Thin Edge", draw1);
-
-	namedWindow("Horizontal Edge", WINDOW_KEEPRATIO);
-	imshow("Horizontal Edge", hor);
-
-	namedWindow("Vertical Edge", WINDOW_KEEPRATIO);
-	imshow("Vertical Edge", ver);
-
-	
-	//2nd Derivative 이용해서 더 얇게 햇을때.
-	//namedWindow("2nd Edge", WINDOW_KEEPRATIO);
-	//imshow("2nd Edge", dx2_edge);
-
-	
-	
+	//namedWindow("Thin Edge", WINDOW_KEEPRATIO);
+	//imshow("Thin Edge", draw1);
 }
 
 
 int main(int argc, char** argv)
 {
-	
+
+	Mat res_h, points_h, labels_h, centers_h;  //K-means algorithm variable
+	int nPoints, cIndex_h, iTemp_h, k_hor = 1, k_ver = 1;
+	Mat res_v, points_v, labels_v, centers_v;
+	int cIndex_v, iTemp_v;
+
+
 	CommandLineParser parser(argc, argv, "{@input | Chessboard.jpg | input image}");
 	src = imread(parser.get<String>("@input"), IMREAD_COLOR); // Load an image 
 	if (src.empty())
@@ -141,13 +109,115 @@ int main(int argc, char** argv)
 	cvtColor(src, src_gray, COLOR_BGR2GRAY);
 
 	CannyThreshold(0, 0);
+	
+	dst.copyTo(Hough_thin);
+
 	cvtColor(dst, dst, COLOR_BGR2GRAY);
 	
+	// Edge Image Horizontal Vertical Separation
+	Mat hor, ver;
+	hor.create(dx_Scharr.size(), CV_8UC1);
+	ver.create(dx_Scharr.size(), CV_8UC1);
+	hor = Scalar::all(0);
+	ver = Scalar::all(0);
+	//dx_Scharr = abs(dx_Scharr);
+	//dy_Scharr = abs(dy_Scharr);
 
+	double temp;
+	for (int y = 0; y <draw1.rows; y++)
+		for (int x = 0; x < draw1.cols; x++)
+		{
+			temp = atan2((double)(dy_Scharr.at<float>(y, x)), (double)(dx_Scharr.at<float>(y, x)));
+
+
+			if ((temp > -CV_PI / 4 && temp <= CV_PI / 4) || (temp > CV_PI * 3 / 4) || (temp <= -CV_PI * 3 / 4))
+				ver.at<uchar>(y, x) = draw1.at<uchar>(y, x);
+			else
+				hor.at<uchar>(y, x) = draw1.at<uchar>(y, x);
+		}
+
+	vector <int> arr;
+	vector <int> arr2;
+	
+	//line 갯수 세기 & K-means clustering의 K 정하기
+	int x, y;
+	for ( x = 0; x < ver.cols; x++)
+	{
+		if (ver.at<uchar>(0, x) > 0)
+		{
+			arr.push_back(x);
+		}
+	}
+
+	for ( y = 0; y < hor.rows; y++)
+	{
+		if (hor.at<uchar>(y, 0) > 0)
+		{
+			arr2.push_back(y);
+		}
+	}
+
+	
+	for ( x = 1; x < arr.size(); x++)
+	{
+		if ((arr[x] - arr[x-1]) > 3)
+			k_ver++;
+	}
+
+	for (int y = 1; y < arr2.size(); y++)
+	{
+		if ((arr2[y] - arr2[y-1]) > 3)
+			k_hor++;
+	}
+
+	cout << "k_ver:" << k_ver << endl;
+	cout << "k_hor: " << k_hor << endl;
+	nPoints = hor.rows*hor.cols;
+
+	points_h.create(nPoints, 1, CV_32FC1);
+	points_v.create(nPoints, 1, CV_32FC1);
+	centers_h.create(k_hor, 1, points_h.type());
+	centers_v.create(k_ver, 1, points_v.type());
+	res_h.create(hor.rows, hor.cols, hor.type());
+	res_v.create(ver.rows, ver.cols, ver.type());
+	
+	//k-means 함수에 맞게 데이터 변환
+	int n;
+	for (y = 0,  n = 0; y < hor.rows; y++)
+	{
+		for (int x = 0; x < hor.cols; x++, n++)
+		{
+			points_h.at<float>(n) = hor.at<uchar>(y, x);
+			points_v.at<float>(n) = ver.at<uchar>(y, x);
+		}
+	}
+	
+	
+	kmeans(points_h, k_hor, labels_h, TermCriteria(CV_TERMCRIT_EPS + CV_TERMCRIT_ITER, 10, 1.0), 3,KMEANS_PP_CENTERS,centers_h);
+	//kmeans(points_v, k_ver, labels_v, TermCriteria(CV_TERMCRIT_EPS + CV_TERMCRIT_ITER, 10, 1.0), 3, KMEANS_PP_CENTERS, centers_v);
+
+	for (y = 0, n = 0; y < hor.rows; y++)
+	{
+		for (x = 0; x < hor.cols; x++, n++)
+		{
+			cIndex_h = labels_h.at<int>(n);
+			if (cIndex_h == 0)
+			{
+				//cout << centers_h.at<float>(cIndex_h) << endl;
+				iTemp_h = cvRound(centers_h.at<float>(cIndex_h));
+				iTemp_h = iTemp_h > 255 ? 255 : iTemp_h < 0 ? 0 : iTemp_h;
+				res_h.at<uchar>(y, x) = (uchar)iTemp_h;
+			}
+			//cIndex_v = labels_v.at<int>(n);
+			//iTemp_v = cvRound(centers_v.at<float>(cIndex_v));
+
+		}
+	}
+	
+	namedWindow("Cluster",WINDOW_KEEPRATIO);
+	imshow("Cluster", res_h);
 	// mat파일 Array로 변환해서 저장하는 부분
-	
-	
-	/*
+/*
 	Mat save;
 	dx2.copyTo(save);
 	vector<int> array;
@@ -175,7 +245,9 @@ int main(int argc, char** argv)
 	//
 	*/
 	
-	/*
+
+
+	/*  Sobel Edge로 결과 나온것 Binary로 만들고(Hough돌리기위해) Line 그리기 위한 RGB형의 Mat파일 만듬
 	Imgbin(Thinedge);
 	Hough_thin.create(Thinedge.size(), CV_8UC3);
 	for (int y = 0; y < Thinedge.rows; y++)
@@ -190,6 +262,7 @@ int main(int argc, char** argv)
 		}
 	}
 	*/
+	
 	/*
 	vector <Vec2f> lines;
 	HoughLines(dst, lines, 1, CV_PI / 180, 250, 0, 0);
@@ -197,14 +270,12 @@ int main(int argc, char** argv)
 	for (int i = 0; i < lines.size(); i++)
 	{
 		float rho = lines[i][0], theta = lines[i][1], theta_d = (lines[i][1]) * 180 / CV_PI;
-		//if (theta_d >= 85 && theta_d <= 95)
-		//{
-		//if (theta_d != 90)
-		//	cnt_out++;
-		//else
-		//	cnt_in++;
-		cout << "각도 : " << theta_d << endl;
-		cout << "r : " << rho << endl;
+		
+		if ((theta_d <= 10 && theta_d >= -10) || (theta_d >= 170) || (theta_d <= -170))
+		{
+			cout << "각도 : " << theta_d << endl;
+			cout << "r : " << rho << endl;
+		}
 		Point  pt1, pt2;
 		double a = cos(theta), b = sin(theta);
 		double x0 = a * rho, y0 = b * rho;
@@ -225,13 +296,21 @@ int main(int argc, char** argv)
 	*/
 	
 
-	/*
-	namedWindow("Source", WINDOW_KEEPRATIO);
-	namedWindow("Hough_edge", WINDOW_KEEPRATIO);
+	namedWindow("Horizontal", WINDOW_KEEPRATIO);
+	imshow("Horizontal", hor);
+	imwrite("Horizontal line.jpg", hor);
+
+	namedWindow("Vertical", WINDOW_KEEPRATIO);
+	imshow("Vertical", ver);
+	imwrite("Vertical line.jpg", ver);
+	
+	
+	//namedWindow("Source", WINDOW_KEEPRATIO);
+	//namedWindow("Hough_edge", WINDOW_KEEPRATIO);
 	//namedWindow("angle", WINDOW_KEEPRATIO);
-	imshow("Source", src);
-	imshow("Hough_edge", Hough_thin);
-	*/
+	//imshow("Source", src);
+	//imshow("Hough_edge", Hough_thin);
+	
 	//imshow("angle", angle);
 	waitKey(0);
 	return 0;
