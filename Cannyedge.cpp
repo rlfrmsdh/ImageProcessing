@@ -12,7 +12,7 @@ Mat src, src_gray;
 Mat dst, detected_edges,mask,Hough_thin,Hough;
 Mat dx_Scharr,dy_Scharr, scharr,dx2;
 Mat draw1;
-Mat Thinedge, dx2_edge;
+Mat dx2_edge;
 int lowThreshold = 10;
 const int max_lowThreshold = 100;
 const int ratio = 3;
@@ -27,24 +27,26 @@ static void Imgbin( Mat &input )
 	white.copyTo(input, input);
 }
 
-static void EdgeThinner(const Mat &input)
+static void EdgeThinner(Mat &input)
 {
 	Mat edge;
-	input.copyTo(edge);
-	int img_height = edge.rows;
-	int img_width = edge.cols;
-	Thinedge.create(edge.size(), CV_8UC1);
-	Thinedge = Scalar::all(0);
+	edge.create(input.size(), CV_8UC1);
+	edge = Scalar::all(0);
+	int img_height = input.rows;
+	int img_width = input.cols;
+	//Thinedge.create(edge.size(), CV_8UC1);
+	//Thinedge = Scalar::all(0);
 
 	for (int y = 0; y < img_height; y++)
 	{
-		uchar *row = edge.ptr<uchar>(y);
+		uchar *row = input.ptr<uchar>(y);
 		for (int x = 0; x < img_width; x++)
 		{
 			if (row[x] > 20)
-				Thinedge.at<uchar>(y, x) = row[x] ;
+				edge.at<uchar>(y, x) = row[x] ;
 		}
 	}
+	edge.copyTo(input);
 
 
 }
@@ -66,6 +68,14 @@ static void CannyThreshold(int, void*)
 	hor.create(dx_Scharr.size(), CV_8UC1);
 	ver.create(dx_Scharr.size(), CV_8UC1);
 	
+	//namedWindow("dx", WINDOW_KEEPRATIO);
+	//imshow("dx", dx_Scharr);
+	//imwrite("dx_Scharr_FocusRange.jpg", dx_Scharr);
+	//namedWindow("dy", WINDOW_KEEPRATIO);
+	//imshow("dy", dy_Scharr);
+
+	dx_Scharr = abs(dx_Scharr);
+	dy_Scharr = abs(dy_Scharr);
 	double maxVal_x, minVal_x;
 	minMaxLoc(dx_Scharr, &minVal_x, &maxVal_x);
 	cout << minVal_x << " " << maxVal_x << endl;
@@ -76,10 +86,11 @@ static void CannyThreshold(int, void*)
 	hor = Scalar::all(0);
 	ver = Scalar::all(0);
 	
-	dx_Scharr.convertTo(ver, CV_8U, 255.0 / (maxVal_x - minVal_x), -minVal_x* 255.0 /(maxVal_x-minVal_x));
-	dy_Scharr.convertTo(hor, CV_8U, 255.0 / (maxVal_y - minVal_y), -minVal_y * 255.0 / (maxVal_y - minVal_y));
+	dx_Scharr.convertTo(ver, CV_8U, 255.0 / (maxVal_x - minVal_x), 0.0 );
+	dy_Scharr.convertTo(hor, CV_8U, 255.0 / (maxVal_y - minVal_y), 0.0 ); 
 
-
+	EdgeThinner(hor);
+	EdgeThinner(ver);
 	
 
 	Canny(detected_edges, mask, lowThreshold, lowThreshold*ratio, kernel_size);
@@ -95,11 +106,8 @@ static void CannyThreshold(int, void*)
 	//imshow("Scharr grad", draw1);
 	
 	//Edge Thinner Showing
-	namedWindow("dx", WINDOW_KEEPRATIO);
-	imshow("dx", dx_Scharr);
-
 	namedWindow("Thin Edge", WINDOW_KEEPRATIO);
-	imshow("Thin Edge", Thinedge);
+	imshow("Thin Edge", draw1);
 
 	namedWindow("Horizontal Edge", WINDOW_KEEPRATIO);
 	imshow("Horizontal Edge", hor);
@@ -107,6 +115,7 @@ static void CannyThreshold(int, void*)
 	namedWindow("Vertical Edge", WINDOW_KEEPRATIO);
 	imshow("Vertical Edge", ver);
 
+	
 	//2nd Derivative 이용해서 더 얇게 햇을때.
 	//namedWindow("2nd Edge", WINDOW_KEEPRATIO);
 	//imshow("2nd Edge", dx2_edge);
