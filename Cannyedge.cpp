@@ -41,7 +41,7 @@ static void EdgeThinner(const Mat &input)
 		uchar *row = edge.ptr<uchar>(y);
 		for (int x = 0; x < img_width; x++)
 		{
-			if (row[x] > 50)
+			if (row[x] > 20)
 				Thinedge.at<uchar>(y, x) = row[x] ;
 		}
 	}
@@ -52,16 +52,33 @@ static void CannyThreshold(int, void*)
 {
 	blur(src_gray, detected_edges, Size(3, 3));
 	Scharr(detected_edges, dx_Scharr, CV_32F, 1, 0, 1, 0, BORDER_REPLICATE);
-	Scharr(detected_edges, dy_Scharr, CV_32F, 0, 1, 1, 0, BORDER_REPLICATE);
+	Scharr(detected_edges, dy_Scharr, CV_32F, 0, 1, 1, 0, BORDER_REPLICATE);   //dx_Scharr, dy_Scharr 형은 CV_32F
 	//sqrt(dx.mul(dx) + dy.mul(dy), sobel);
 	sqrt(dx_Scharr.mul(dx_Scharr) + dy_Scharr.mul(dy_Scharr), scharr);
 		
 	double minVal_s, maxVal_s;
 	minMaxLoc(scharr, &minVal_s, &maxVal_s);
 		
-	scharr.convertTo(draw1, CV_8U, 255.0 / (maxVal_s - minVal_s), 0);
+	scharr.convertTo(draw1, CV_8U, 255.0 / (maxVal_s - minVal_s), 0); // draw1 에 Scharr 결과 대입하면서 CV_8U로 형변환
 	EdgeThinner(draw1);
 	
+	Mat hor, ver;
+	hor.create(dx_Scharr.size(), CV_8UC1);
+	ver.create(dx_Scharr.size(), CV_8UC1);
+	
+	double maxVal_x, minVal_x;
+	minMaxLoc(dx_Scharr, &minVal_x, &maxVal_x);
+	cout << minVal_x << " " << maxVal_x << endl;
+	double maxVal_y, minVal_y;
+	minMaxLoc(dy_Scharr, &minVal_y, &maxVal_y);
+	cout << minVal_y << " " << maxVal_y << endl;
+
+	hor = Scalar::all(0);
+	ver = Scalar::all(0);
+	
+	dx_Scharr.convertTo(ver, CV_8U, 255.0 / (maxVal_x - minVal_x), -minVal_x* 255.0 /(maxVal_x-minVal_x));
+	dy_Scharr.convertTo(hor, CV_8U, 255.0 / (maxVal_y - minVal_y), -minVal_y * 255.0 / (maxVal_y - minVal_y));
+
 
 	
 
@@ -78,12 +95,21 @@ static void CannyThreshold(int, void*)
 	//imshow("Scharr grad", draw1);
 	
 	//Edge Thinner Showing
+	namedWindow("dx", WINDOW_KEEPRATIO);
+	imshow("dx", dx_Scharr);
+
 	namedWindow("Thin Edge", WINDOW_KEEPRATIO);
-	imshow("Thin Edge", draw1);
+	imshow("Thin Edge", Thinedge);
+
+	namedWindow("Horizontal Edge", WINDOW_KEEPRATIO);
+	imshow("Horizontal Edge", hor);
+
+	namedWindow("Vertical Edge", WINDOW_KEEPRATIO);
+	imshow("Vertical Edge", ver);
 
 	//2nd Derivative 이용해서 더 얇게 햇을때.
-	namedWindow("2nd Edge", WINDOW_KEEPRATIO);
-	imshow("2nd Edge", dx2_edge);
+	//namedWindow("2nd Edge", WINDOW_KEEPRATIO);
+	//imshow("2nd Edge", dx2_edge);
 
 	
 	
@@ -140,6 +166,7 @@ int main(int argc, char** argv)
 	//
 	*/
 	
+	/*
 	Imgbin(Thinedge);
 	Hough_thin.create(Thinedge.size(), CV_8UC3);
 	for (int y = 0; y < Thinedge.rows; y++)
@@ -153,8 +180,8 @@ int main(int argc, char** argv)
 			temp[3 * x + 2] = temp1[x];
 		}
 	}
-
-	
+	*/
+	/*
 	vector <Vec2f> lines;
 	HoughLines(dst, lines, 1, CV_PI / 180, 250, 0, 0);
 	//int cnt_out=0, cnt_in=0;
@@ -168,6 +195,7 @@ int main(int argc, char** argv)
 		//else
 		//	cnt_in++;
 		cout << "각도 : " << theta_d << endl;
+		cout << "r : " << rho << endl;
 		Point  pt1, pt2;
 		double a = cos(theta), b = sin(theta);
 		double x0 = a * rho, y0 = b * rho;
@@ -178,14 +206,23 @@ int main(int argc, char** argv)
 		line(Hough_thin, pt1, pt2, Scalar(0, 0, 255), 2, LINE_AA);
 		//}
 	}
-	imwrite("Houghline_byCanny.jpg", Hough_thin);
+	*/
+	/*
+	bool compare(Vec2f &line1, Vec2f &line2)
+	{
+		line1
+	}
+	sort(lines[][0].begin(), lines[][0].end());
+	*/
+	
 
-
+	/*
 	namedWindow("Source", WINDOW_KEEPRATIO);
 	namedWindow("Hough_edge", WINDOW_KEEPRATIO);
 	//namedWindow("angle", WINDOW_KEEPRATIO);
 	imshow("Source", src);
 	imshow("Hough_edge", Hough_thin);
+	*/
 	//imshow("angle", angle);
 	waitKey(0);
 	return 0;
