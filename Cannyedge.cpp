@@ -82,18 +82,14 @@ static void CannyThreshold(int, void*)
 	//imshow("dy", dy_Scharr);
 
 	//Edge Thinner Showing
-	//namedWindow("Thin Edge", WINDOW_KEEPRATIO);
-	//imshow("Thin Edge", draw1);
+
 }
 
 
 int main(int argc, char** argv)
 {
 
-	Mat res_h, points_h, labels_h, centers_h;  //K-means algorithm variable
-	int nPoints, cIndex_h, iTemp_h, k_hor = 1, k_ver = 1;
-	Mat res_v, points_v, labels_v, centers_v;
-	int cIndex_v, iTemp_v;
+	int lineno_hor = 1, lineno_ver = 1;
 
 
 	CommandLineParser parser(argc, argv, "{@input | Chessboard.jpg | input image}");
@@ -136,86 +132,84 @@ int main(int argc, char** argv)
 				hor.at<uchar>(y, x) = draw1.at<uchar>(y, x);
 		}
 
-	vector <int> arr;
-	vector <int> arr2;
+	vector <vector <float> > arr;
+	vector <vector <float> > arr2;
 	
-	//line 갯수 세기 & K-means clustering의 K 정하기
+	//line 갯수 세기 
+	
 	int x, y;
-	for ( x = 0; x < ver.cols; x++)
+	int i = 1, j = 1, cnt=0;
+	for (x = 0; x < ver.cols; x++)
 	{
 		if (ver.at<uchar>(0, x) > 0)
 		{
-			arr.push_back(x);
+			vector <float> row;
+			temp = atan2((double)(dy_Scharr.at<float>(0, x)), (double)(dx_Scharr.at<float>(0, x)));
+			row.push_back(x);
+			row.push_back(temp*180/CV_PI);
+			arr.push_back(row);
 		}
+		
 	}
-
+	for (int y = 0; y < arr.size(); y++)
+		cout << arr[0] << endl;     // 	vector <vector <float> > arr2; 이런식일때 한 row 어떻게 출력하는지 알아보기 !
+	/*
 	for ( y = 0; y < hor.rows; y++)
 	{
 		if (hor.at<uchar>(y, 0) > 0)
 		{
-			arr2.push_back(y);
+			arr2[j][0] = y;
+			j++;
 		}
 	}
-
-	
+	*/
+	/*
+	i = 1, j = 1;
 	for ( x = 1; x < arr.size(); x++)
 	{
-		if ((arr[x] - arr[x-1]) > 3)
-			k_ver++;
+		if ((arr[x][0] - arr[x - 1][0]) < 3)
+		{
+			arr[x - 1][1] = i;
+			i++;
+		}
 	}
-
 	for (int y = 1; y < arr2.size(); y++)
 	{
-		if ((arr2[y] - arr2[y-1]) > 3)
-			k_hor++;
-	}
-
-	cout << "k_ver:" << k_ver << endl;
-	cout << "k_hor: " << k_hor << endl;
-	nPoints = hor.rows*hor.cols;
-
-	points_h.create(nPoints, 1, CV_32FC1);
-	points_v.create(nPoints, 1, CV_32FC1);
-	centers_h.create(k_hor, 1, points_h.type());
-	centers_v.create(k_ver, 1, points_v.type());
-	res_h.create(hor.rows, hor.cols, hor.type());
-	res_v.create(ver.rows, ver.cols, ver.type());
-	
-	//k-means 함수에 맞게 데이터 변환
-	int n;
-	for (y = 0,  n = 0; y < hor.rows; y++)
-	{
-		for (int x = 0; x < hor.cols; x++, n++)
+		if ((arr2[y][0] - arr2[y - 1][0]) < 3)
 		{
-			points_h.at<float>(n) = hor.at<uchar>(y, x);
-			points_v.at<float>(n) = ver.at<uchar>(y, x);
+			arr2[y - 1][1] = j;
+			j++;
 		}
 	}
 	
-	
-	kmeans(points_h, k_hor, labels_h, TermCriteria(CV_TERMCRIT_EPS + CV_TERMCRIT_ITER, 10, 1.0), 3,KMEANS_PP_CENTERS,centers_h);
-	//kmeans(points_v, k_ver, labels_v, TermCriteria(CV_TERMCRIT_EPS + CV_TERMCRIT_ITER, 10, 1.0), 3, KMEANS_PP_CENTERS, centers_v);
+	for (int y = 0; y < arr.size(); y++)
+		cout << arr[y] << endl;
+	for (int y = 0; y < arr2.size(); y++)
+		cout << arr2[y] << endl;
+		*/
+	namedWindow("Thin Edge", WINDOW_KEEPRATIO);
+	imshow("Thin Edge", draw1);
 
-	for (y = 0, n = 0; y < hor.rows; y++)
+	/*
+	cout << "Horizontal line(1) or Vertical line(2): ";
+	int classify;
+	cin >> classify;
+
+	cout << "몇번째 line ? ";
+	int linenum; 
+	cin >> linenum;
+	
+	if (classify == 1)   // Horizontal line
 	{
-		for (x = 0; x < hor.cols; x++, n++)
-		{
-			cIndex_h = labels_h.at<int>(n);
-			if (cIndex_h == 0)
-			{
-				//cout << centers_h.at<float>(cIndex_h) << endl;
-				iTemp_h = cvRound(centers_h.at<float>(cIndex_h));
-				iTemp_h = iTemp_h > 255 ? 255 : iTemp_h < 0 ? 0 : iTemp_h;
-				res_h.at<uchar>(y, x) = (uchar)iTemp_h;
-			}
-			//cIndex_v = labels_v.at<int>(n);
-			//iTemp_v = cvRound(centers_v.at<float>(cIndex_v));
 
-		}
 	}
-	
-	namedWindow("Cluster",WINDOW_KEEPRATIO);
-	imshow("Cluster", res_h);
+	else   // Vertical line
+	{
+
+	}
+	*/
+
+
 	// mat파일 Array로 변환해서 저장하는 부분
 /*
 	Mat save;
@@ -298,11 +292,9 @@ int main(int argc, char** argv)
 
 	namedWindow("Horizontal", WINDOW_KEEPRATIO);
 	imshow("Horizontal", hor);
-	imwrite("Horizontal line.jpg", hor);
 
 	namedWindow("Vertical", WINDOW_KEEPRATIO);
 	imshow("Vertical", ver);
-	imwrite("Vertical line.jpg", ver);
 	
 	
 	//namedWindow("Source", WINDOW_KEEPRATIO);
