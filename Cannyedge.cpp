@@ -101,7 +101,7 @@ int main(int argc, char** argv)
 	int testpoint = 0;
 	int thick_blur = 30;  //blur해지면 해질수록 이 값을 키워서 line fitting 할 영역을 정해야함
 
-	CommandLineParser parser(argc, argv, "{@input | Chessboard_tilt.jpg | input image}");
+	CommandLineParser parser(argc, argv, "{@input | Chessboard.jpg | input image}");
 	src = imread(parser.get<String>("@input"), IMREAD_COLOR); // Load an image 
 	if (src.empty())
 	{
@@ -358,8 +358,8 @@ int main(int argc, char** argv)
 	point_h.push_back(arr_h[size_h - 1][0] < height - 15 ? arr_h[size_h - 1][0] + 15 : arr_h[size_h - 1][0]);
 
 
-	for (i = 0; i < point_v.size(); i++)
-		cout << "Vertical pt : " << point_v[i] << endl;
+	//for (i = 0; i < point_v.size(); i++)
+		//cout << "Vertical pt : " << point_v[i] << endl;
 
 	//for (i = 0; i < point_h.size(); i++)
 		//cout << "Horizontal pt : " << point_h[i] << endl;
@@ -470,8 +470,8 @@ int main(int argc, char** argv)
 	char dir[10];
 	int linenum;
 
-	strcpy_s(dir, "Hor");
-	linenum = 5;
+	strcpy_s(dir, "Ver");
+	linenum = 6;
 
 	Mat A, B, X;
 	Mat chosenline;
@@ -495,10 +495,11 @@ int main(int argc, char** argv)
 	{
 		float r1, r2;
 		r1 = sin(Horizontal_theta[0])*point_h[2 * (linenum - 1)]; // cos(theta)*x + sin(theta)*y = r 그러나 Horizontal line에서는 x=0
-		r2 = sin(Horizontal_theta[1])*point_h[2 * (linenum - 1) + 1];
+		r2 = sin(Horizontal_theta[1])*point_h[2 * (linenum - 1) + 1]; /// Horizontal 에서는 작은 각도가 영역의 시작 모서리, 큰 각도가 끝 모서리
+
 
 		//Section 표시
-		
+		/*
 		Point  pt1, pt2;
 		double a = cos(Horizontal_theta[0]), b = sin(Horizontal_theta[0]);
 		double x0 = a * sin(Horizontal_theta[0])*point_h[2 * (linenum - 1)], y0 = b * sin(Horizontal_theta[0])*point_h[2 * (linenum - 1)];
@@ -515,21 +516,28 @@ int main(int argc, char** argv)
 		pt2.x = cvRound(x0 - 2500 * (-b));
 		pt2.y = cvRound(y0 - 2000 * a);
 		line(hor, pt1, pt2, Scalar(0, 0, 255), 2, LINE_AA);
-		
+		*/
 
-		/*
+		
 		for (x = 0; x < width; x++)
 			{
 			int y1, y2;
 				y1 = (-cos(Horizontal_theta[0]) / sin(Horizontal_theta[0]))*x + r1 / sin(Horizontal_theta[0]);
 				y2 = (-cos(Horizontal_theta[1]) / sin(Horizontal_theta[1]))*x + r1 / sin(Horizontal_theta[1]);
 				//cout << "y1 :" << y1 << "y2 : " << y2 << endl;
-				for (y = y1; y < y2; y++)
-				{
-					if (hor.at<Vec3b>(y, x)[0]!= 0)
+				y1 = y1 < 0 ? 0 : y1;
+				y1 = y1 > height ? height : y1;
+				y2 = y2 < 0 ? 0 : y2;
+				y2 = y2 > height ? height : y2;
+				if(y2<=height)
+				{ 
+					for (y = y1; y < y2; y++)
 					{
-						vec_A.push_back(Vec2f(x, 1));
-						vec_B.push_back(y);
+						if (hor.at<Vec3b>(y, x)[0]!= 0)
+						{
+							vec_A.push_back(Vec2f(x, 1));
+							vec_B.push_back(y);
+						}
 					}
 				}
 			}
@@ -584,7 +592,7 @@ int main(int argc, char** argv)
 	myfile.close();
 	}
 	else cout << "Unable to open file";
-	*/
+	
 	}
 	
 	
@@ -592,14 +600,15 @@ int main(int argc, char** argv)
 	{
 		
 		float r1, r2;
-		r1 = cos(Vertical_theta[0])*point_v[2 * (linenum - 1)]; // cos(theta)*x + sin(theta)*y = r 그러나 Vertical line에서는 y=0
-		r2 = cos(Vertical_theta[1])*point_v[2 * (linenum - 1) + 1];
+		r1 = cos(Vertical_theta[1])*point_v[2 * (linenum - 1)]; // cos(theta)*x + sin(theta)*y = r 그러나 Vertical line에서는 y=0
+		r2 = cos(Vertical_theta[0])*point_v[2 * (linenum - 1) + 1];  // Vertical 에서는 큰 각도가 영역의 시작 모서리, 작은 각도가 영역의 끝 모서리
 
 		//Section 표시
 		
+		/*
 		Point  pt1, pt2;
 		double a = cos(Vertical_theta[0]), b = sin(Vertical_theta[0]);
-		double x0 = a * r1, y0 = b * r1;
+		double x0 = a * r2, y0 = b * r2;
 		pt1.x = cvRound(x0 + 2500 * (-b));
 		pt1.y = cvRound(y0 + 2000 * a);
 		pt2.x = cvRound(x0 - 2500 * (-b));
@@ -607,34 +616,41 @@ int main(int argc, char** argv)
 		line(ver, pt1, pt2, Scalar(0, 0, 255), 2, LINE_AA);
 
 		a = cos(Vertical_theta[1]), b = sin(Vertical_theta[1]);
-		x0 = a * r2, y0 = b * r2;
+		x0 = a * r1, y0 = b * r1;
 		pt1.x = cvRound(x0 + 2500 * (-b));
 		pt1.y = cvRound(y0 + 2000 * a);
 		pt2.x = cvRound(x0 - 2500 * (-b));
 		pt2.y = cvRound(y0 - 2000 * a);
 		line(ver, pt1, pt2, Scalar(0, 0, 255), 2, LINE_AA);
+		*/
 		
-		/*
 		for (y = 0; y < height; y++)
 		{
 			int x1, x2;
-			x2 = (-sin(Vertical_theta[0]) / cos(Vertical_theta[0]))*x + r1 / cos(Vertical_theta[0]);
-			x1 = (-sin(Vertical_theta[1]) / cos(Vertical_theta[1]))*x + r2 / cos(Vertical_theta[1]);
-			//cout << "y1 :" << y1 << "y2 : " << y2 << endl;
-			for (x = x1; x < x2; x++)
-			{
-				if (ver.at<Vec3b>(y, x)[0] != 0)
+			x2 = (-sin(Vertical_theta[0]) / cos(Vertical_theta[0]))*y + r2 / cos(Vertical_theta[0]);
+			x1 = (-sin(Vertical_theta[1]) / cos(Vertical_theta[1]))*y + r1 / cos(Vertical_theta[1]);
+			x1 = x1 < 0 ? 0 : x1;
+			x1 = x1 > width ? width : x1;
+			x2 = x2 < 0 ? 0 : x2;
+			x2 = x2 > width ? width : x2;
+			//cout << "x1 :" << x1 << "x2 : " << x2 << endl;
+				for (x = x1; x < x2; x++)
 				{
-					vec_A.push_back(Vec2f(y, 1));
-					vec_B.push_back(x);
+					if (ver.at<Vec3b>(y, x)[0] != 0)
+					{
+						vec_A.push_back(Vec2f(y, 1));
+						vec_B.push_back(x);
+					}
 				}
-			}
+			
+			
+
 		}
 
 		cout << "Vec A size:" << vec_A.size() << endl;
 		cout << "Vec B size: " << vec_B.size() << endl;
 
-
+		
 		//create Mat
 		A.create(vec_A.size(), 2, CV_32FC1);
 		B.create(vec_B.size(), 1, CV_32FC1);
@@ -656,10 +672,10 @@ int main(int argc, char** argv)
 		pt2.y = height;
 		pt1.x = a * pt1.y + b;
 		pt2.x = a * pt2.y + b;
-		line(ver, pt1, pt2, Scalar(0, 0, 255), 2, LINE_AA);
+		line(src, pt1, pt2, Scalar(0, 0, 255), 2, LINE_AA);
 
 		namedWindow("Line Fitting Result", WINDOW_KEEPRATIO);
-		imshow("Line Fitting Result", ver);
+		imshow("Line Fitting Result", src);
 
 		//cout << "A size : " << A.cols << endl;
 		//cout << "B size : " << B.size() << endl;
@@ -681,7 +697,7 @@ int main(int argc, char** argv)
 			myfile.close();
 		}
 		else cout << "Unable to open file";
-		*/
+		
 	}
 /*
 	for (int r = r_v[(linenum - 1) * 2]; r < r_v[(linenum - 1) * 2 + 1]; r++)
@@ -760,18 +776,18 @@ int main(int argc, char** argv)
 
 
 
-	namedWindow("Horizontal", WINDOW_KEEPRATIO);
-	imshow("Horizontal", hor);
+	//namedWindow("Horizontal", WINDOW_KEEPRATIO);
+	//imshow("Horizontal", hor);
 //	imwrite("Horizontal Section.jpg", hor);
 
-	namedWindow("Vertical", WINDOW_KEEPRATIO);
-	imshow("Vertical", ver);
+	//namedWindow("Vertical", WINDOW_KEEPRATIO);
+	//imshow("Vertical", ver);
 	//imwrite("Vertical Section.jpg", ver);
 	
-	namedWindow("Source", WINDOW_KEEPRATIO);
+	//namedWindow("Source", WINDOW_KEEPRATIO);
 	//namedWindow("Hough_edge", WINDOW_KEEPRATIO);
 	//namedWindow("angle", WINDOW_KEEPRATIO);
-	imshow("Source", src);
+	//imshow("Source", src);
 	//imshow("Hough_edge", Hough_thin);
 	
 	//imshow("angle", angle);
