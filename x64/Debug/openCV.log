@@ -3,33 +3,33 @@ c:\opencv_prebuild\build\include\opencv2\core\mat.hpp(1964): warning C4819: 현�
 c:\opencv_prebuild\build\include\opencv2\core\persistence.hpp : warning C4819: 현재 코드 페이지(949)에서 표시할 수 없는 문자가 파일에 들어 있습니다. 데이터가 손실되지 않게 하려면 해당 파일을 유니코드 형식으로 저장하십시오.
 c:\opencv_prebuild\build\include\opencv2\core\utility.hpp : warning C4819: 현재 코드 페이지(949)에서 표시할 수 없는 문자가 파일에 들어 있습니다. 데이터가 손실되지 않게 하려면 해당 파일을 유니코드 형식으로 저장하십시오.
 c:\opencv_prebuild\build\include\opencv2\core\utility.hpp : warning C4819: 현재 코드 페이지(949)에서 표시할 수 없는 문자가 파일에 들어 있습니다. 데이터가 손실되지 않게 하려면 해당 파일을 유니코드 형식으로 저장하십시오.
-c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(228): warning C4244: '인수': 'int'에서 'const float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(239): warning C4244: '인수': 'int'에서 'const float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(247): warning C4244: '인수': 'int'에서 'const float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(253): warning C4244: '인수': 'int'에서 'const float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(256): warning C4244: '인수': 'int'에서 'const float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(262): warning C4244: '인수': 'int'에서 'const float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(296): warning C4244: '=': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(309): warning C4244: '인수': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(310): warning C4244: '인수': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(313): warning C4244: '인수': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(314): warning C4244: '인수': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(332): warning C4267: '=': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(333): warning C4267: '=': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(525): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(526): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(538): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(539): warning C4244: '인수': 'int'에서 'const float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(550): warning C4267: '인수': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(551): warning C4267: '인수': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(568): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(569): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(630): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(631): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(641): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(642): warning C4244: '인수': 'int'에서 'const float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(655): warning C4267: '인수': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(656): warning C4267: '인수': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(673): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(674): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(193): warning C4244: '인수': 'int'에서 'const float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(204): warning C4244: '인수': 'int'에서 'const float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(212): warning C4244: '인수': 'int'에서 'const float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(218): warning C4244: '인수': 'int'에서 'const float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(221): warning C4244: '인수': 'int'에서 'const float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(227): warning C4244: '인수': 'int'에서 'const float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(258): warning C4244: '=': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(271): warning C4244: '인수': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(272): warning C4244: '인수': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(275): warning C4244: '인수': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(276): warning C4244: '인수': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(289): warning C4267: '=': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(290): warning C4267: '=': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(365): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(366): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(379): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(380): warning C4244: '인수': 'int'에서 'const float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(391): warning C4267: '인수': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(392): warning C4267: '인수': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(409): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(410): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(473): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(474): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(485): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(486): warning C4244: '인수': 'int'에서 'const float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(499): warning C4267: '인수': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(500): warning C4267: '인수': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(517): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+c:\users\keuno\source\repos\opencv\opencv\cannyedge.cpp(518): warning C4244: '=': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
   openCV.vcxproj -> C:\Users\keuno\source\repos\openCV\x64\Debug\openCV.exe

@@ -101,7 +101,7 @@ int main(int argc, char** argv)
 	int testpoint = 0;
 	int thick_blur = 30;  //blur해지면 해질수록 이 값을 키워서 line fitting 할 영역을 정해야함
 
-	CommandLineParser parser(argc, argv, "{@input | Chessboard.jpg | input image}");
+	CommandLineParser parser(argc, argv, "{@input | Chessboard_tilt.jpg | input image}");
 	src = imread(parser.get<String>("@input"), IMREAD_COLOR); // Load an image 
 	if (src.empty())
 	{
@@ -173,43 +173,8 @@ int main(int argc, char** argv)
 		line_cpy.push_back(row);
 	}
 	sort(line_cpy.begin(), line_cpy.end(), sortcol2);
-	/*
-	for (int i = 0; i < line_cpy.size(); i++)
-	{
-		float rho = line_cpy[i][0], theta = line_cpy[i][1], theta_d = theta * 180 / CV_PI;
-	
-		//cout << "각도 : " << theta_d << endl;
-		cout << "r : " << rho << endl;
-
-		/*
-		if (theta_d >= 90)
-		{
-			Point  pt1, pt2;
-			double a = cos(theta), b = sin(theta);
-			double x0 = a * rho, y0 = b * rho;
-			pt1.x = cvRound(x0 + 2500 * (-b));
-			pt1.y = cvRound(y0 + 2000 * a);
-			pt2.x = cvRound(x0 - 2500 * (-b));
-			pt2.y = cvRound(y0 - 2000 * a);
-			line(hor, pt1, pt2, Scalar(0, 0, 255), 2, LINE_AA);
-		}
-		else
-		{
-			Point pt1, pt2;
-
-			double a = cos(theta), b = sin(theta);
-			double x0 = a * rho, y0 = b * rho;
-			pt1.x = cvRound(x0 + 2500 * (-b));
-			pt1.y = cvRound(y0 + 2000 * a);
-			pt2.x = cvRound(x0 - 2500 * (-b));
-			pt2.y = cvRound(y0 - 2000 * a);
-			line(ver, pt1, pt2, Scalar(0, 0, 255), 2, LINE_AA);
-
-
-		}
-		
-	}*/
 	//////////////////////////////////////////////////////////////
+
 
 	//line 갯수 세기 & vector 채워넣기
 	//////////////////////////////////////////////////////////////////////////////////
@@ -280,9 +245,6 @@ int main(int argc, char** argv)
 			cout << arr_h[y][x] << " ";
 		cout << endl;
 	}*/
-	
-
-
 	//////////////////////////////////////////////////////////////////////////////////
 
 	// Horizontal line과 Vertical line의 각도 뽑아내기 (by. Hough)
@@ -313,11 +275,6 @@ int main(int argc, char** argv)
 	Vertical_theta.push_back(theta_sort_v[0] - CV_PI/180);
 	Vertical_theta.push_back(theta_sort_v[theta_sort_v.size() - 1] + CV_PI/180);
 	cout << "Vertical theta : " << Vertical_theta[0] * 180 / CV_PI << "," << Vertical_theta[1] * 180 / CV_PI << endl;
-	//Horizontal_theta.push_back(theta_sort_h[0] ); //최소값-1
-	//Horizontal_theta.push_back(theta_sort_h[theta_sort_h.size() - 1]); //최댓값+1
-
-	//Vertical_theta.push_back(theta_sort_v[0] );
-	//Vertical_theta.push_back(theta_sort_v[theta_sort_v.size() - 1] );
 	/////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -358,138 +315,21 @@ int main(int argc, char** argv)
 	point_h.push_back(arr_h[size_h - 1][0] < height - 15 ? arr_h[size_h - 1][0] + 15 : arr_h[size_h - 1][0]);
 
 
-	//for (i = 0; i < point_v.size(); i++)
-		//cout << "Vertical pt : " << point_v[i] << endl;
 
-	//for (i = 0; i < point_h.size(); i++)
-		//cout << "Horizontal pt : " << point_h[i] << endl;
-
-	/*
-	//Vertical
-	for (j = 0; j < size(Vertical_theta); j++)
-	{
-		float r = cos(Vertical_theta[j])*arr_v[0][0];
-		r = r < 15 ? r : r - 15;
-		r_v.push_back(r);
-		//cout << "r init" << r << endl;
-		line_plot_v.push_back(Vec2f(r, Vertical_theta[j]));
-		cnt = 0;
-		for (i = 1; i < size_v; i++)
-		{
-			
-			if (arr_v[i][0] - arr_v[i - 1][0] > 100)
-			{
-				r = cos(Vertical_theta[j])*arr_v[i - 1][0];
-				r_v.push_back(r);
-				line_plot_v.push_back(Vec2f(r+15,Vertical_theta[j]));
-				//cout << "r fin " << r + 15 << endl;
-
-				r = cos(Vertical_theta[j])*arr_v[i][0];
-				r_v.push_back(r);
-				line_plot_v.push_back(Vec2f(r-15,Vertical_theta[j]));
-				//cout << "r init " << r - 15 << endl;
-				
-				cnt = cnt + 2;
-
-			}
-		}
-		line_plot_v.push_back(Vec2f(cos(Vertical_theta[j])*arr_v[size_v - 1][0]+15,Vertical_theta[j]));
-		r_v.push_back(cos(Vertical_theta[j])*arr_v[size_v - 1][0] + 15);
-		cout << " r fin" << r + 15 << endl;
-	}
-
-	
-	for (int i = 0; i < line_plot_v.size(); i++)
-	{
-		float rho = line_plot_v[i][0], theta = line_plot_v[i][1], theta_d = theta * 180 / CV_PI;
-
-		cout << "Vertical lines " << endl;
-		//cout << "각도 : " << theta_d << endl;
-		cout << "r : " << rho << endl;
-
-
-		Point  pt1, pt2;
-		double a = cos(theta), b = sin(theta);
-		double x0 = a * rho, y0 = b * rho;
-		pt1.x = cvRound(x0 + 2500 * (-b));
-		pt1.y = cvRound(y0 + 2000 * a);
-		pt2.x = cvRound(x0 - 2500 * (-b));
-		pt2.y = cvRound(y0 - 2000 * a);
-		line(ver, pt1, pt2, Scalar(0, 0, 255), 2, LINE_AA);
-
-	}
-	
-	//Horizontal
-	for (j = 0; j < size(Horizontal_theta); j++)
-	{
-		float r;
-		r = sin(Horizontal_theta[j])*arr_h[0][0];
-		r = r < 15 ? r : r - 15;
-		r_h.push_back(r);
-		line_plot_h.push_back(Vec2f(r, Horizontal_theta[j]));
-		cnt = 0;
-		for (i = 1; i < size_h; i++)
-		{
-			if (arr_h[i][0] - arr_h[i - 1][0] > 100)
-			{
-				r = sin(Horizontal_theta[j])*arr_h[i-1][0];
-				r_h.push_back(r);
-				line_plot_h.push_back(Vec2f(r+15, Horizontal_theta[j]));
-				r = sin(Horizontal_theta[j])*arr_h[i][0];
-				r_h.push_back(r);
-				line_plot_h.push_back(Vec2f(r-15, Horizontal_theta[j]));
-				cnt = cnt + 2;
-
-			}
-		}
-		line_plot_h.push_back(Vec2f(sin(Horizontal_theta[j])*arr_h[size_h - 1][0]+15, Horizontal_theta[j]));
-		r_h.push_back(sin(Horizontal_theta[j])*arr_h[size_h - 1][0] + 15);
-	}
-
-
-	for (int i = 0; i < line_plot_h.size(); i++)
-	{
-		float rho = line_plot_h[i][0], theta = line_plot_h[i][1], theta_d = theta * 180 / CV_PI;
-
-		cout << "Horizontal line " << endl;
-		//cout << "각도 : " << theta_d << endl;
-		cout << "r : " << rho << endl;
-
-
-		Point  pt1, pt2;
-		double a = cos(theta), b = sin(theta);
-		double x0 = a * rho, y0 = b * rho;
-		pt1.x = cvRound(x0 + 2500 * (-b));
-		pt1.y = cvRound(y0 + 2000 * a);
-		pt2.x = cvRound(x0 - 2500 * (-b));
-		pt2.y = cvRound(y0 - 2000 * a);
-		line(hor, pt1, pt2, Scalar(0, 0, 255), 2, LINE_AA);
-
-	}*/
-
+	//영역별 계산
 	char dir[10];
 	int linenum;
 
-	strcpy_s(dir, "Ver");
-	linenum = 6;
+	strcpy_s(dir, "Hor");
+	linenum = 3;
 
 	Mat A, B, X;
 	Mat chosenline;
 	vector <Vec2f> vec_A;
 	vector <float> vec_B;
-	chosenline.create(height, width, CV_8UC3);
+	chosenline.create(height, width, CV_8UC1);
 	chosenline = Scalar::all(0);
-	for (y = 0; y < draw1.rows; y++)
-	{
-	uchar *imagerow = draw1.ptr<uchar>(y);
-	for (x=0; x<draw1.cols; x++)
-	{
-	chosenline.at<Vec3b>(y,x)[0] = imagerow[x];
-	chosenline.at<Vec3b>(y,x)[1] = imagerow[x];
-	chosenline.at<Vec3b>(y,x)[2] = imagerow[x];
-	}
-	}
-
+	
 	
 	if (!strcmp(dir,"Hor"))   //Horizontal line Line fitting
 	{
@@ -523,7 +363,7 @@ int main(int argc, char** argv)
 			{
 			int y1, y2;
 				y1 = (-cos(Horizontal_theta[0]) / sin(Horizontal_theta[0]))*x + r1 / sin(Horizontal_theta[0]);
-				y2 = (-cos(Horizontal_theta[1]) / sin(Horizontal_theta[1]))*x + r1 / sin(Horizontal_theta[1]);
+				y2 = (-cos(Horizontal_theta[1]) / sin(Horizontal_theta[1]))*x + r2 / sin(Horizontal_theta[1]);
 				//cout << "y1 :" << y1 << "y2 : " << y2 << endl;
 				y1 = y1 < 0 ? 0 : y1;
 				y1 = y1 > height ? height : y1;
@@ -535,6 +375,7 @@ int main(int argc, char** argv)
 					{
 						if (hor.at<Vec3b>(y, x)[0]!= 0)
 						{
+							chosenline.at<uchar>(y, x) = hor.at<Vec3b>(y, x)[0];
 							vec_A.push_back(Vec2f(x, 1));
 							vec_B.push_back(y);
 						}
@@ -569,6 +410,9 @@ int main(int argc, char** argv)
 	pt2.y = a * pt2.x + b;
 	line(src, pt1, pt2, Scalar(0, 0, 255), 2, LINE_AA);
 
+	namedWindow("Chosen line", WINDOW_KEEPRATIO);
+	imshow("Chosen line", chosenline);
+
 	namedWindow("Line Fitting Result",WINDOW_KEEPRATIO);
 	imshow("Line Fitting Result",src);
 
@@ -594,7 +438,6 @@ int main(int argc, char** argv)
 	else cout << "Unable to open file";
 	
 	}
-	
 	
 	else        //Vertical Line Fitting
 	{
@@ -638,6 +481,7 @@ int main(int argc, char** argv)
 				{
 					if (ver.at<Vec3b>(y, x)[0] != 0)
 					{
+						chosenline.at<uchar>(y, x) = ver.at<Vec3b>(y, x)[0];
 						vec_A.push_back(Vec2f(y, 1));
 						vec_B.push_back(x);
 					}
@@ -674,6 +518,9 @@ int main(int argc, char** argv)
 		pt2.x = a * pt2.y + b;
 		line(src, pt1, pt2, Scalar(0, 0, 255), 2, LINE_AA);
 
+		namedWindow("Chosen line", WINDOW_KEEPRATIO);
+		imshow("Chosen line", chosenline);
+
 		namedWindow("Line Fitting Result", WINDOW_KEEPRATIO);
 		imshow("Line Fitting Result", src);
 
@@ -699,82 +546,6 @@ int main(int argc, char** argv)
 		else cout << "Unable to open file";
 		
 	}
-/*
-	for (int r = r_v[(linenum - 1) * 2]; r < r_v[(linenum - 1) * 2 + 1]; r++)
-	{
-	for (y = 0; y < height; y++)
-	{
-	x = (-sin(Vertical_theta*CV_PI / 180) / cos(Vertical_theta*CV_PI / 180))*y + r / cos(Vertical_theta*CV_PI / 180);
-	//if (y % 1 != 0)
-	//cout << "y 출력 : " << endl;
-
-	if (ver.at<uchar>(y, x) != 0)
-	{
-	vec_A.push_back(Vec2f(y, 1));
-	vec_B.push_back(x);
-	}
-	}
-	}
-	cout << "Vec A size:" << vec_A.size() << endl;
-	cout << "Vec B size: " << vec_B.size() << endl;
-
-	//create Mat
-	A.create(vec_A.size(), 2, CV_32FC1);
-	B.create(vec_B.size(), 1, CV_32FC1);
-	//copy vector to mat
-	memcpy(A.data, vec_A.data(), vec_A.size() * sizeof(float) * 2);
-	memcpy(B.data, vec_B.data(), vec_B.size() * sizeof(float));
-
-	X = A.inv(DECOMP_SVD)*B;
-
-	cout << X.size() << endl;
-	cout << X << endl; /// X.at<float>(0,0)= a  X.at<float>(1,0) = b
-
-	float a, b;
-	a = X.at<float>(0, 0);
-	b = X.at<float>(1, 0);
-
-	Point pt1, pt2;
-	pt1.y = 0;
-	pt2.y = height;
-	pt1.x = a * pt1.y + b;
-	pt2.x = a * pt2.y + b;
-	line(chosenline, pt1, pt2, Scalar(0, 0, 255), 2, LINE_AA);
-
-	namedWindow("Line Fitting Result", WINDOW_KEEPRATIO);
-	imshow("Line Fitting Result", chosenline);
-
-	Mat differ;
-	differ.create(B.rows, 1, CV_32FC1);
-	differ = A*X-B;
-
-	vector <float> diff;
-	diff.assign((float*)differ.datastart, (float*)differ.dataend);
-	*/
-	/*
-	ofstream myfile("Line Fitting Result.txt");
-	if (myfile.is_open())
-	{
-	//myfile << "Writing this to a file \n";
-
-	for (int count = 0; count < diff.size(); count++)
-	myfile << diff[count] << " ";
-
-	//myfile << "\n End of file \n";
-
-	myfile.close();
-	}
-	else cout << "Unable to open file";
-	//
-
-	
-	}*/
-	////////////////////////////////////////////////////////////////////////
-
-
-
-
-
 
 	//namedWindow("Horizontal", WINDOW_KEEPRATIO);
 	//imshow("Horizontal", hor);
@@ -783,14 +554,8 @@ int main(int argc, char** argv)
 	//namedWindow("Vertical", WINDOW_KEEPRATIO);
 	//imshow("Vertical", ver);
 	//imwrite("Vertical Section.jpg", ver);
-	
-	//namedWindow("Source", WINDOW_KEEPRATIO);
-	//namedWindow("Hough_edge", WINDOW_KEEPRATIO);
-	//namedWindow("angle", WINDOW_KEEPRATIO);
-	//imshow("Source", src);
-	//imshow("Hough_edge", Hough_thin);
-	
-	//imshow("angle", angle);
+
+
 	waitKey(0);
 	return 0;
 }
