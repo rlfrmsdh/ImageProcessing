@@ -6,7 +6,7 @@
 
 using namespace cv;
 using namespace std;
-Mat src,src_gray,src_part,lap;
+Mat src,src_gray,src_part,lap,scharr,dx,dy;
 vector <vector<float>> fmeas;
 
 float LAP1(Mat &a)
@@ -35,17 +35,25 @@ int main(void)
 	int ver_part = 6;
 	float blur_limit;
 	int i, j, cnt;
-	src = imread("Chessboard_focusmeasure.jpg", IMREAD_COLOR); // Load an image 
+	src = imread("Chessboard_focusmeasure2.jpg", IMREAD_COLOR); // Load an image 
 	src.convertTo(src_gray, CV_8UC1, 1.0, 0.0);
+	lap.create(src.rows, src.cols, CV_16SC3);
+	blur(src_gray, src_gray, Size(3, 3));
+
+	Scharr(src_gray, dx, CV_32F, 1, 0, 1, 0, BORDER_REPLICATE);
+	Scharr(src_gray, dy, CV_32F, 0, 1, 1, 0, BORDER_REPLICATE);   //dx_Scharr, dy_Scharr 형은 CV_32F
+																			   //sqrt(dx.mul(dx) + dy.mul(dy), sobel);
+	sqrt(dx.mul(dx) + dy.mul(dy), scharr);  // Mat.mul(Mat)는 element by element multiplication
+
+	double minVal_s, maxVal_s;
+	minMaxLoc(scharr, &minVal_s, &maxVal_s);
+
+	scharr.convertTo(scharr, CV_8U, 255.0 / (maxVal_s - minVal_s), 0);
 
 	//src_part.create(900, 850, CV_8UC1);
 	//src_part = Scalar::all(0);
 	//src_part = src_gray(Range(0, 1600), Range(300, 1700));     // 앞에가 Row, 뒤에가 Col range
-	
-	
-	
-	lap.create(src.rows, src.cols, CV_16SC3);
-	blur(src_gray, src_gray, Size(3, 3));
+		
 	Laplacian(src_gray, lap, CV_16S, 3, 1.0, 0.0, BORDER_DEFAULT);
 	convertScaleAbs(lap, lap, 1.0, 0.0);
 	
@@ -80,17 +88,18 @@ int main(void)
 	sort(fmeas.begin(), fmeas.end(),sortcol2);
 	blur_limit = (fmeas[fmeas.size()-1][0]-fmeas[0][0])*0.3 + fmeas[0][0];
 	for (i=0; i< fmeas.size();i++)
-	{ 
-		cout << fmeas[i][0] << "  ";
+	{	
+		int seq = fmeas[i][1];
+		int rem, div;
+		rem = seq % hor_part;
+		div = seq / hor_part;
+		cout << "F-meas : " << fmeas[i][0] << "Position" << "[" << div + 1 << " , " << rem + 1 << "]" << endl;
 		if (fmeas[i][0] >= blur_limit)
 		{
-			int seq = fmeas[i][1];
-			//cout << fmeas_cpy[i] << endl;
-			int rem, div;
+			
 			int x_lt, x_rt, x_lb, x_rb, y_lt, y_rt, y_lb, y_rb;
 			Point lt, rt, lb, rb;
-			rem = seq % hor_part;
-			div = seq / hor_part;
+		
 			
 			if (div == ver_part - 1)
 			{
@@ -139,9 +148,11 @@ int main(void)
 	}
 	
 
-	//namedWindow("Laplacian", WINDOW_KEEPRATIO);
-	//imshow("Laplacian", lap);
+	namedWindow("Laplacian", WINDOW_KEEPRATIO);
+	imshow("Laplacian", lap);
 
+	namedWindow("Scharr", WINDOW_KEEPRATIO);
+	imshow("Scharr", scharr);
 //namedWindow("Part", WINDOW_KEEPRATIO);
 //imshow("Part", src_part);
 //imwrite("Chessboard_focusmeasure1.jpg", src_part);
