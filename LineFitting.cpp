@@ -33,8 +33,6 @@ static void EdgeThinner(Mat &input)
 	edge = Scalar::all(0);
 	int img_height = input.rows;
 	int img_width = input.cols;
-	//Thinedge.create(edge.size(), CV_8UC1);
-	//Thinedge = Scalar::all(0);
 
 	for (int y = 0; y < img_height; y++)
 	{
@@ -98,11 +96,13 @@ bool sortcol2(const vector<float> &a, const vector<float> &b)
 int main(int argc, char** argv)
 {
 	int height, width;
-	int testpoint = 0;
+	int testpoint = 900;
 	int thick_blur = 30;  //blur해지면 해질수록 이 값을 키워서 line fitting 할 영역을 정해야함
 
-	CommandLineParser parser(argc, argv, "{@input | Chessboard_tilt.jpg | input image}");
+	CommandLineParser parser(argc, argv, "{@input | Chessboard_focusmeasure2.jpg | input image}");
 	src = imread(parser.get<String>("@input"), IMREAD_COLOR); // Load an image 
+	src = src(Range(0,src.rows), Range(50,src.cols));
+	imwrite("Chessboard_focusmeasure2.jpg", src);
 	if (src.empty())
 	{
 		std::cout << "Could not open or find the image!\n" << std::endl;
@@ -158,8 +158,8 @@ int main(int argc, char** argv)
 		}
 
 
-	/////////////////////////////////////////////////////////////////////end
-
+	////////////////////////////////////////////////////////////////////end
+	
 	//Hough Transfer
 	//////////////////////////////////////////////////////////////////
 	vector <Vec2f> lines;
@@ -178,11 +178,11 @@ int main(int argc, char** argv)
 
 	//line 갯수 세기 & vector 채워넣기
 	//////////////////////////////////////////////////////////////////////////////////
-
+	
 	vector <vector <float> > arr_v;
 	vector <vector <float> > arr_h;
 	//arr 과 arr2에 저장순서 : [pixel위치(x or y), 몇번째 line인지]
-
+	
 	int x, y;
 	int i = 1, j = 1, cnt = 0;
 	for (x = 0; x < ver.cols; x++)
@@ -236,8 +236,6 @@ int main(int argc, char** argv)
 			cout << arr_v[y][x] << " ";
 		cout << endl;
 	}
-	*/
-	/*
 	cout << "arr2_h 출력 : " << endl;
 	for (int y = 0; y < arr_h.size(); y++)
 	{
@@ -249,6 +247,7 @@ int main(int argc, char** argv)
 
 	// Horizontal line과 Vertical line의 각도 뽑아내기 (by. Hough)
 	///////////////////////////////////////////////////////////////////////////////
+	
 	vector <float> theta_sort_v;
 	vector <float> theta_sort_h;
 	for (i = 0; i < line_cpy.size(); i++)
@@ -275,11 +274,13 @@ int main(int argc, char** argv)
 	Vertical_theta.push_back(theta_sort_v[0] - CV_PI/180);
 	Vertical_theta.push_back(theta_sort_v[theta_sort_v.size() - 1] + CV_PI/180);
 	cout << "Vertical theta : " << Vertical_theta[0] * 180 / CV_PI << "," << Vertical_theta[1] * 180 / CV_PI << endl;
+	
 	/////////////////////////////////////////////////////////////////////////////////////////
 
 
 	// Line들의 시작, 끝 포인트 뽑고. 위에서 구한 각도를 통해 영역 계산  영역별 pixel position 뽑아내기.   
 	////////////////////////////////////////////////////////////////////////////////////start
+
 	vector <float> point_v;
 	vector <float> point_h;
 	vector <Vec2f> line_plot_v;
@@ -320,8 +321,8 @@ int main(int argc, char** argv)
 	char dir[10];
 	int linenum;
 
-	strcpy_s(dir, "Hor");
-	linenum = 3;
+	strcpy_s(dir, "Ver");
+	linenum = 1;
 
 	Mat A, B, X;
 	Mat chosenline;
@@ -439,6 +440,7 @@ int main(int argc, char** argv)
 	
 	}
 	
+
 	else        //Vertical Line Fitting
 	{
 		
@@ -546,16 +548,16 @@ int main(int argc, char** argv)
 		else cout << "Unable to open file";
 		
 	}
+	
 
-	//namedWindow("Horizontal", WINDOW_KEEPRATIO);
-	//imshow("Horizontal", hor);
 //	imwrite("Horizontal Section.jpg", hor);
 
-	//namedWindow("Vertical", WINDOW_KEEPRATIO);
-	//imshow("Vertical", ver);
+	
 	//imwrite("Vertical Section.jpg", ver);
-
-
+	namedWindow("Horizontal", WINDOW_KEEPRATIO);
+	imshow("Horizontal", hor);
+	namedWindow("Vertical", WINDOW_KEEPRATIO);
+	imshow("Vertical", ver);
 	waitKey(0);
 	return 0;
 }
