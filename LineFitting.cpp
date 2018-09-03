@@ -82,27 +82,26 @@ static void CannyThreshold(int, void*)
 	//Edge Thinner Showing
 
 }
-bool sortcol(const vector<float> &a, const vector<float> &b)
-{
-	return a[0] < b[0];
-}
 
 bool sortcol2(const vector<float> &a, const vector<float> &b)
 {
 	return a[1] > b[1];
 }
-
+bool sortf(const Vec2f &a, const Vec2f &b)
+{
+	return a[0] < b[0];
+}
 
 int main(int argc, char** argv)
 {
 	int height, width;
-	int testpoint = 900;
+	int testpoint = 0;
 	int thick_blur = 30;  //blur해지면 해질수록 이 값을 키워서 line fitting 할 영역을 정해야함
 
-	CommandLineParser parser(argc, argv, "{@input | Chessboard_focusmeasure2.jpg | input image}");
+	CommandLineParser parser(argc, argv, "{@input | Chessboard.jpg | input image}");
 	src = imread(parser.get<String>("@input"), IMREAD_COLOR); // Load an image 
-	src = src(Range(0,src.rows), Range(50,src.cols));
-	imwrite("Chessboard_focusmeasure2.jpg", src);
+	//src = src(Range(0,src.rows), Range(50,src.cols));
+	//imwrite("Chessboard_focusmeasure2.jpg", src);
 	if (src.empty())
 	{
 		std::cout << "Could not open or find the image!\n" << std::endl;
@@ -187,7 +186,7 @@ int main(int argc, char** argv)
 	int i = 1, j = 1, cnt = 0;
 	for (x = 0; x < ver.cols; x++)
 	{
-		if (ver.at<Vec3b>(testpoint, x)[0] > 0 || ver.at<Vec3b>(testpoint, x)[1] > 0 || ver.at<Vec3b>(testpoint, x)[2] > 0)
+		if (ver.at<Vec3b>(testpoint, x)[0] > 0 || ver.at<Vec3b>(testpoint, x)[1] > 0 || ver.at<Vec3b>(testpoint, x)[2] > 0)  // 기울인 직선으로 포인트들을 감지해 내면 영역을 정할 때 그 point에서 뻗어나가기 때문에 다른 영역을 포함하게됨
 		{
 			vector <float> row;
 			row.push_back(x);
@@ -316,13 +315,107 @@ int main(int argc, char** argv)
 	point_h.push_back(arr_h[size_h - 1][0] < height - 15 ? arr_h[size_h - 1][0] + 15 : arr_h[size_h - 1][0]);
 
 
+	Point given;
+	given.x = 1536;
+	given.y = 527;
 
+	float r1, r2;
+	Mat A, B, X;
+	Mat chosenline;
+	vector <Vec2f> vec_A;
+	vector <float> vec_B;
+	vector <float> slope;
+	vector <float> yinter;
+	chosenline.create(height, width, CV_8UC1);
+	chosenline = Scalar::all(0);
+	cout << point_h.size() << endl;
+	
+	for (i = 1; i <= point_h.size() / 2; i++)
+	{
+		r1 = sin(Horizontal_theta[0])*point_h[2 * (i - 1)]; // cos(theta)*x + sin(theta)*y = r 그러나 Horizontal line에서는 x=0
+		r2 = sin(Horizontal_theta[1])*point_h[2 * (i - 1) + 1]; /// Horizontal 에서는 작은 각도가 영역의 시작 모서리, 큰 각도가 끝 모서리
+		vec_A.clear();
+		vec_B.clear();
+
+		for (x = 0; x < width; x++)
+		{
+			int y1, y2;
+			y1 = (-cos(Horizontal_theta[0]) / sin(Horizontal_theta[0]))*x + r1 / sin(Horizontal_theta[0]);
+			y2 = (-cos(Horizontal_theta[1]) / sin(Horizontal_theta[1]))*x + r2 / sin(Horizontal_theta[1]);
+			//cout << "y1 :" << y1 << "y2 : " << y2 << endl;
+			y1 = y1 < 0 ? 0 : y1;
+			y1 = y1 > height ? height : y1;
+			y2 = y2 < 0 ? 0 : y2;
+			y2 = y2 > height ? height : y2;
+			if (y2 <= height)
+			{
+				for (y = y1; y < y2; y++)
+				{
+					if (hor.at<Vec3b>(y, x)[0] != 0)
+					{
+						//chosenline.at<uchar>(y, x) = hor.at<Vec3b>(y, x)[0];
+						vec_A.push_back(Vec2f(x, 1));
+						vec_B.push_back(y);
+					}
+				}
+			}
+		}
+		//create Mat
+		A.create(vec_A.size(), 2, CV_32FC1);
+		B.create(vec_B.size(), 1, CV_32FC1);
+		//copy vector to mat
+		memcpy(A.data, vec_A.data(), vec_A.size() * sizeof(float) * 2);
+		memcpy(B.data, vec_B.data(), vec_B.size() * sizeof(float));
+
+		X = A.inv(DECOMP_SVD)*B;
+
+	
+		slope.push_back(X.at<float>(0, 0));
+		yinter.push_back(X.at<float>(1, 0));
+	}
+	
+	vector <Vec2f> distance;
+	for (i = 0; i < slope.size(); i++)
+	{
+		distance.push_back(Vec2f(abs(slope[i] * given.x - given.y + yinter[i]) / sqrt(slope[i] * slope[i] + 1),i+1));
+	}
+	sort(distance.begin(), distance.end(), sortf);
+
+	for(i=0; i<distance.size();i++)
+		cout << "거리 출력 : " << distance[i] << endl;
+		
+
+	Point line_pt1, line_pt2;
+	line_pt1.x = 0;
+	line_pt2.x = width;
+	//pt1.y = a[distance[0][1]] * pt1.x + b[distance[0][1]];
+	//pt2.y = a[distance[0][1]] * pt2.x + b[distance[0][1]];
+	line_pt1.y = slope[distance[0][1]-1] * line_pt1.x + yinter[distance[0][1] - 1];
+	line_pt2.y = slope[distance[0][1] - 1] * line_pt2.x + yinter[distance[0][1] - 1];
+	
+	line(src, line_pt1, line_pt2, Scalar(0, 0, 255), 2, LINE_AA);
+
+	Mat *ptr = new Mat;
+	src.copyTo(*ptr);
+
+	namedWindow("Line Fitting Result", WINDOW_KEEPRATIO);
+	imshow("Line Fitting Result", *ptr);
+
+	float angle =atan(slope[distance[0][1] - 1]) * 180 / CV_PI;
+	cout << "각도 : " << angle << endl;
+
+	angle = floorf(angle * 100) / 100;
+	cout << "각도 반올림 : " << angle << endl;
+
+
+
+	/*
 	//영역별 계산
 	char dir[10];
 	int linenum;
 
-	strcpy_s(dir, "Ver");
-	linenum = 1;
+	strcpy_s(dir, "Hor");
+	linenum = 2;
 
 	Mat A, B, X;
 	Mat chosenline;
@@ -330,8 +423,9 @@ int main(int argc, char** argv)
 	vector <float> vec_B;
 	chosenline.create(height, width, CV_8UC1);
 	chosenline = Scalar::all(0);
-	
-	
+	cout << point_h.size() << endl;
+
+
 	if (!strcmp(dir,"Hor"))   //Horizontal line Line fitting
 	{
 		float r1, r2;
@@ -340,7 +434,7 @@ int main(int argc, char** argv)
 
 
 		//Section 표시
-		/*
+		
 		Point  pt1, pt2;
 		double a = cos(Horizontal_theta[0]), b = sin(Horizontal_theta[0]);
 		double x0 = a * sin(Horizontal_theta[0])*point_h[2 * (linenum - 1)], y0 = b * sin(Horizontal_theta[0])*point_h[2 * (linenum - 1)];
@@ -357,7 +451,7 @@ int main(int argc, char** argv)
 		pt2.x = cvRound(x0 - 2500 * (-b));
 		pt2.y = cvRound(y0 - 2000 * a);
 		line(hor, pt1, pt2, Scalar(0, 0, 255), 2, LINE_AA);
-		*/
+		
 
 		
 		for (x = 0; x < width; x++)
@@ -411,11 +505,15 @@ int main(int argc, char** argv)
 	pt2.y = a * pt2.x + b;
 	line(src, pt1, pt2, Scalar(0, 0, 255), 2, LINE_AA);
 
+	Mat *ptr = new Mat;
+	src.copyTo(*ptr);
+
+
 	namedWindow("Chosen line", WINDOW_KEEPRATIO);
 	imshow("Chosen line", chosenline);
 
 	namedWindow("Line Fitting Result",WINDOW_KEEPRATIO);
-	imshow("Line Fitting Result",src);
+	imshow("Line Fitting Result",*ptr);
 
 	//cout << "A size : " << A.cols << endl;
 	//cout << "B size : " << B.size() << endl;
@@ -450,7 +548,7 @@ int main(int argc, char** argv)
 
 		//Section 표시
 		
-		/*
+		
 		Point  pt1, pt2;
 		double a = cos(Vertical_theta[0]), b = sin(Vertical_theta[0]);
 		double x0 = a * r2, y0 = b * r2;
@@ -467,7 +565,7 @@ int main(int argc, char** argv)
 		pt2.x = cvRound(x0 - 2500 * (-b));
 		pt2.y = cvRound(y0 - 2000 * a);
 		line(ver, pt1, pt2, Scalar(0, 0, 255), 2, LINE_AA);
-		*/
+		
 		
 		for (y = 0; y < height; y++)
 		{
@@ -520,11 +618,14 @@ int main(int argc, char** argv)
 		pt2.x = a * pt2.y + b;
 		line(src, pt1, pt2, Scalar(0, 0, 255), 2, LINE_AA);
 
+		Mat *ptr = new Mat;
+		src.copyTo(*ptr);
+
 		namedWindow("Chosen line", WINDOW_KEEPRATIO);
 		imshow("Chosen line", chosenline);
 
 		namedWindow("Line Fitting Result", WINDOW_KEEPRATIO);
-		imshow("Line Fitting Result", src);
+		imshow("Line Fitting Result", *ptr);
 
 		//cout << "A size : " << A.cols << endl;
 		//cout << "B size : " << B.size() << endl;
@@ -548,7 +649,7 @@ int main(int argc, char** argv)
 		else cout << "Unable to open file";
 		
 	}
-	
+	*/
 
 //	imwrite("Horizontal Section.jpg", hor);
 
