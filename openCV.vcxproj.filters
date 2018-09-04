@@ -26,7 +26,10 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="FocusMeasure.cpp">
+    <ClCompile Include="Color.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Iris.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

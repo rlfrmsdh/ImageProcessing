@@ -6,6 +6,33 @@
 using namespace cv;
 using namespace std;
 
+Mat blending(Mat &a, int lowbdry, int highbdry, Scalar colorname,int intensity)
+{
+	int x, y;
+	Mat a_copy;
+	a.convertTo(a_copy, CV_32FC3);
+	Mat output;
+	
+	Mat alpha(a.rows, a.cols, CV_32FC3, Scalar(0, 0, 0));
+	Mat color(a.rows, a.cols, CV_32FC3, Scalar(colorname));
+	for (y = 0; y < alpha.rows; y++)
+	{
+		Vec3f *row = alpha.ptr<Vec3f>(y);
+		for (x = lowbdry; x < highbdry; x++)
+		{
+			row[x] = Vec3f(intensity,intensity,intensity);
+		}
+	}
+	alpha.convertTo(alpha, CV_32FC3, 1.0 / 255);
+
+	multiply(color, alpha, color);
+	multiply(a_copy, Scalar::all(1) - alpha, a_copy);
+	add(color, a_copy, output);
+	output.convertTo(output, CV_8UC3);
+
+	return output;
+}
+
 int main(void)
 {
 	int x, y,i;
@@ -20,9 +47,10 @@ int main(void)
 	bool accumulate = false;
 
 	//Draw the Histogram
-	int hist_w = 1024, hist_h = 400;
-	int bin_w = cvRound((double) hist_w/histSize);
-	Mat histimg(hist_h, hist_w, CV_8UC3, Scalar(0, 0, 0));
+	int hist_w = 1084, hist_h = 400;
+	int blank = 60;
+	int bin_w = cvRound((double) (hist_w-blank)/histSize);
+	Mat histimg(hist_h, hist_w, CV_32FC3, Scalar(0, 0, 0));
 	
 
 	Point pt1, pt2;
@@ -69,21 +97,34 @@ int main(void)
 	calcHist(&hist, 1, 0, Mat(), result, 1, &histSize, &histRange, uniform, accumulate);
 	cout << "hist size : " << hist.size() << endl;
 	cout << "result size : " << result.size() << endl;
-
+	cout << hist << endl;
 	//cout << "Normalize Àü: " << result << endl;
 	normalize(result, result, 0, histimg.rows, NORM_MINMAX, -1, Mat());
 	//cout << "Normalize ÈÄ : " << result << endl;
+	histimg = blending(histimg, blank / 2, hist_w - blank / 2, Color::aqua,120);
+
 	for (i = 1; i < histSize; i++)
 	{
-		line(histimg, Point(bin_w*(i - 1), hist_h - cvRound(result.at<float>(i-1))), Point(bin_w*i, hist_h - cvRound(result.at<float>(i))),Color::aliceblue,2,LINE_AA);
+		line(histimg, Point(blank/2+bin_w*(i - 1), hist_h - cvRound(result.at<float>(i-1))), Point(blank / 2 +bin_w*i, hist_h - cvRound(result.at<float>(i))),Color::aliceblue,2,LINE_AA);
 	}
-	
+
+	int black_low=40, black_high=80;
+	int white_low=200, white_high=220;
+
+	histimg = blending(histimg, black_low*bin_w, black_high*bin_w, Color::bisque,100);
+	histimg = blending(histimg, white_low*bin_w, white_high*bin_w, Color::bisque,100);
+
+	Mat *histo = new Mat;
+	histimg.copyTo(*histo);
+
+
+	namedWindow("Histogram", WINDOW_KEEPRATIO);
+	imshow("Histogram", *histo);
 
 	namedWindow("Source", WINDOW_KEEPRATIO);
 	imshow("Source", src);
 
-	namedWindow("Histogram", WINDOW_KEEPRATIO);
-	imshow("Histogram", histimg);
+	
 
 	waitKey(0);
 }

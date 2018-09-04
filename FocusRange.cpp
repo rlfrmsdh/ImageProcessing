@@ -56,7 +56,9 @@ for (i = 0; i < Inrange.size(); i++)
 		highbdry = Inrange[i].y;
 }
 
-Mat alpha(src.rows,src.cols,CV_32FC3,Scalar(0,0,0));
+Mat *FMrange = new Mat(src.rows, src.cols, CV_32FC3);
+
+Mat alpha(src.rows, src.cols, CV_32FC3, Scalar(0, 0, 0));
 
 for (y = lowbdry; y < highbdry; y++)
 {
@@ -75,13 +77,12 @@ multiply(red, alpha, red);
 
 
 
-Mat FMrange, src_alpha;
+Mat src_alpha;
 src_alpha.create(src.rows, src.cols, CV_32FC3);
-FMrange.create(src.rows, src.cols, CV_32FC3);
 src.convertTo(src, CV_32FC3);
 multiply(src, Scalar::all(1) - alpha, src_alpha);
-add(src_alpha, red, FMrange);
-
+add(src_alpha, red, *FMrange);
+FMrange->convertTo(*FMrange, CV_8UC3);
 
 
 //namedWindow("FMplot", WINDOW_KEEPRATIO);
@@ -92,7 +93,7 @@ add(src_alpha, red, FMrange);
 
 
 namedWindow("FMrange", WINDOW_KEEPRATIO);
-imshow("FMrange", FMrange/255);
+imshow("FMrange", *FMrange);
 waitKey(0);
 
 }
